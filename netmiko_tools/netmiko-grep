@@ -23,21 +23,19 @@ import io
 import os.path
 import subprocess
 import threading
-from Queue import Queue
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 from datetime import datetime
 
 from netmiko import ConnectHandler
 from netmiko.utilities import load_yaml_file, load_devices, display_inventory
 from netmiko.utilities import obtain_all_devices
+from netmiko.utilities import SHOW_RUN_MAPPER
 from pprint import pprint
 
 GREP = '/bin/grep'
-
-# Dictionary mapping 'show run' for vendors with different command
-SHOW_RUN_MAPPER = {
-    'juniper': 'show configuration',
-    'juniper_junos': 'show configuration',
-}
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -145,7 +143,7 @@ def main(args):
         # Write files
         while not output_q.empty():
             my_dict = output_q.get()
-            for device_name, output in my_dict.iteritems():
+            for device_name, output in my_dict.items():
                 file_name = write_tmp_file(device_name, output)
                 my_files.append(file_name)
 
