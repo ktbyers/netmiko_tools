@@ -66,6 +66,7 @@ def ssh_conn(device_name, a_device, cli_command, output_q):
     net_connect = ConnectHandler(**a_device)
     net_connect.enable()
     output = net_connect.send_command_expect(cli_command)
+    net_connect.disconnect()
     output_q.put({device_name: output})
 
 
