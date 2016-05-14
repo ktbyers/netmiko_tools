@@ -26,7 +26,9 @@ import threading
 from Queue import Queue
 from datetime import datetime
 
-from netmiko import ConnectHandler, load_yaml_file
+from netmiko import ConnectHandler
+from netmiko.utilities import load_yaml_file, load_devices, display_inventory
+from netmiko.utilities import obtain_all_devices
 from pprint import pprint
 
 GREP = '/bin/grep'
@@ -50,26 +52,6 @@ def grepx(files, pattern, grep_options, use_colors=True):
     return ''
 
 
-def load_devices():
-    """Find and load .netmiko.cfg YAML file."""
-    yaml_devices_file = find_file()
-    return load_yaml_file(yaml_devices_file)
-
-
-def find_file(file_name=None):
-    """Look for .netmiko.cfg in current dir, then ~/.netmiko.cfg."""
-    check_files = [
-        '.netmiko.cfg',
-        os.path.expanduser('~') + '/.netmiko.cfg',
-    ]
-    if file_name:
-        check_files.insert(0, file_name)
-    for test_file in check_files:
-        if os.path.isfile(test_file):
-            return test_file
-    raise IOError("{} file not found in current dir or home dir.".format(file_name))
-
-
 def obtain_file_name(device_name):
     """Create file name based on device_name."""
     return "/tmp/{0}.txt".format(device_name)
@@ -87,40 +69,6 @@ def ssh_conn(device_name, a_device, cli_command, output_q):
     net_connect.enable()
     output = net_connect.send_command_expect(cli_command)
     output_q.put({device_name: output})
-
-
-def obtain_all_devices(my_devices):
-    """Dynamically create 'all' group."""
-    new_devices = {}
-    for device_name, device_or_group in my_devices.items():
-        # Skip any groups
-        if not isinstance(device_or_group, list):
-            new_devices[device_name] = device_or_group
-    return new_devices
-
-
-def display_inventory(my_devices):
-    """Print out inventory devices and groups."""
-    inventory_groups = ['all']
-    inventory_devices = []
-    for k, v in my_devices.items():
-        if isinstance(v, list):
-            inventory_groups.append(k)
-        elif isinstance(v, dict):
-            inventory_devices.append((k, v['device_type']))
-
-    inventory_groups.sort()
-    inventory_devices.sort(key=lambda x: x[0])
-    print("\nDevices:")
-    print('-' * 40)
-    for a_device, device_type in inventory_devices:
-        device_type = "  ({})".format(device_type)
-        print("{:<25}{:>15}".format(a_device, device_type))
-    print("\n\nGroups:")
-    print('-' * 40)
-    for a_group in inventory_groups:
-        print(a_group)
-    print()
 
 
 def parse_arguments(args):
