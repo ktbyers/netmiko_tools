@@ -26,7 +26,7 @@ import threading
 from Queue import Queue
 from datetime import datetime
 
-from netmiko import ConnectHandler
+from netmiko import ConnectHandler, load_yaml_file
 from pprint import pprint
 
 GREP = '/bin/grep'
@@ -68,19 +68,6 @@ def find_file(file_name=None):
         if os.path.isfile(test_file):
             return test_file
     raise IOError("{} file not found in current dir or home dir.".format(file_name))
-
-
-def load_yaml_file(yaml_file):
-    """Read YAML file."""
-    try:
-        import yaml
-    except ImportError:
-        sys.exit("Unable to import yaml module.")
-    try:
-        with io.open(yaml_file, encoding='utf-8') as fname:
-            return yaml.load(fname)
-    except IOError:
-        sys.exit("Unable to open YAML file: {0}".format(yaml_file))
 
 
 def obtain_file_name(device_name):
