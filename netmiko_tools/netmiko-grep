@@ -55,11 +55,8 @@ def obtain_netmiko_filename(device_name):
     """Create file name based on device_name."""
     (netmiko_base_dir, netmiko_full_dir) = find_netmiko_dir()
     # Make sure directories exist (create if necessary)
-    print(netmiko_base_dir)
-    print(netmiko_full_dir)
-    sys.exit()
-#    ensure_dir_exists(netmiko_base_dir)
-#    ensure_dir_exists(netmiko_full_dir)
+    ensure_dir_exists(netmiko_base_dir)
+    ensure_dir_exists(netmiko_full_dir)
     return "{}/{}.txt".format(netmiko_full_dir, device_name)
 
 
@@ -72,12 +69,12 @@ def write_tmp_file(device_name, output):
 
 def ensure_dir_exists(verify_dir):
     """Ensure directory exists. Create if necessary."""
-    if not os.path_exists(verify_dir):
+    if not os.path.exists(verify_dir):
         # Doesn't exist create dir
         os.makedirs(verify_dir)
     else:
         # Exists
-        if not os.path.isdir(netmiko_base_dir):
+        if not os.path.isdir(verify_dir):
             # Not a dir, raise an exception
             raise ValueError("{} is not a directory".format(verify_dir))
 
@@ -88,7 +85,6 @@ def find_netmiko_dir():
         netmiko_base_dir = os.environ['NETMIKO_DIR']
     except KeyError:
         netmiko_base_dir = NETMIKO_BASE_DIR
-    print('zzz')
     netmiko_base_dir = os.path.expanduser(netmiko_base_dir)
     if netmiko_base_dir == '/':
         raise ValueError("/ cannot be netmiko_base_dir")
