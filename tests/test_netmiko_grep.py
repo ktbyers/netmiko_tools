@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import time
 import subprocess
+import re
 
 NETMIKO_GREP = '/home/gituser/netmiko_tools/netmiko_tools/netmiko-grep'
 
@@ -113,7 +114,44 @@ def test_group_all():
         '/tmp/arista_sw4.txt:interface Ethernet1',
     ]
     (output, std_err) = subprocess_handler(cmd_list)
-#    print(output)
     for pattern in output_patterns:
         assert pattern in output
     assert std_err == ''
+
+
+def test_cmd_single_device():
+    cmd_list = [NETMIKO_GREP] + ['--cmd', 'show arp', '10.220.88.', 'pynet_rtr1']
+    output_patterns = [
+        'Internet  10.220.88.20            -   c89c.1dea.0eb6  ARPA',
+    ]
+    (output, std_err) = subprocess_handler(cmd_list)
+    for pattern in output_patterns:
+        assert pattern in output
+    assert std_err == ''
+
+
+def test_cmd_group():
+    cmd_list = [NETMIKO_GREP] + ['--cmd', 'show arp', '10.220.88.', 'cisco']
+    output_patterns = [
+        '/tmp/pynet_rtr1.txt:Internet  10.220.88.20            -   c89c.1dea.0eb6  ARPA',
+        '/tmp/pynet_rtr2.txt:Internet  10.220.88.21            -   1c6a.7aaf.576c  ARPA',
+    ]
+    (output, std_err) = subprocess_handler(cmd_list)
+    for pattern in output_patterns:
+        assert pattern in output
+    assert std_err == ''
+
+
+def test_use_cache():
+    """With cached files this should come back in under a second"""
+    # Generate cached files
+    cmd_list = [NETMIKO_GREP] + ['interface', 'all']
+    subprocess_handler(cmd_list)
+    cmd_list = [NETMIKO_GREP] + ['--use-cache', 'interface', 'all']
+    (output, std_err) = subprocess_handler(cmd_list)
+    match = re.search("Total time: (0:.*)$", output)
+    time = match.group(1)
+    _, _, seconds = time.split(":")
+    seconds = float(seconds)
+    assert seconds <= 1
+    assert '/tmp/pynet_rtr1.txt:interface FastEthernet0' in output
