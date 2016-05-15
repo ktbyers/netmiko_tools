@@ -3,14 +3,15 @@
 Create grep like remote behavior on show run or command output
 
 ToDo:
-2. No support for grep options
-4. Test on larger set of devices >50
-5. Write to ~/.netmiko directory
-7. Remove files (what about cache)
-8. Test on windows
-9. Add username/password arguments
-10. Support JSON output
-11. use-cache is problem if command before wasn't running config
+1. No support for grep options
+2. Test on larger set of devices >50
+*3. Write to ~/.netmiko directory (FIX)
+4. Remove files (what about cache)
+5. Test on windows
+*6. Add username/password arguments (REMOVE?)
+7. Support JSON output
+8. use-cache is problem if command before wasn't running config
+9. Handling failed authentications so it doesn't try to write the file
 """
 
 from __future__ import print_function
@@ -19,7 +20,7 @@ from __future__ import unicode_literals
 import argparse
 import sys
 import io
-import os.path
+import os
 import subprocess
 import threading
 try:
@@ -35,6 +36,7 @@ from netmiko.utilities import SHOW_RUN_MAPPER
 from pprint import pprint
 
 GREP = '/bin/grep'
+NETMIKO_BASE_DIR = '~/.netmiko'
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -49,18 +51,51 @@ def grepx(files, pattern, grep_options, use_colors=True):
     return ''
 
 
-def obtain_file_name(device_name):
+def obtain_netmiko_filename(device_name):
     """Create file name based on device_name."""
-    return "/tmp/{0}.txt".format(device_name)
+    (netmiko_base_dir, netmiko_full_dir) = find_netmiko_dir()
+    # Make sure directories exist (create if necessary)
+    print(netmiko_base_dir)
+    print(netmiko_full_dir)
+    sys.exit()
+#    ensure_dir_exists(netmiko_base_dir)
+#    ensure_dir_exists(netmiko_full_dir)
+    return "{}/{}.txt".format(netmiko_full_dir, device_name)
 
 
 def write_tmp_file(device_name, output):
-    file_name = obtain_file_name(device_name)
+    file_name = obtain_netmiko_filename(device_name)
     with open(file_name, "w") as f:
         f.write(output)
     return file_name
 
 
+def ensure_dir_exists(verify_dir):
+    """Ensure directory exists. Create if necessary."""
+    if not os.path_exists(verify_dir):
+        # Doesn't exist create dir
+        os.makedirs(verify_dir)
+    else:
+        # Exists
+        if not os.path.isdir(netmiko_base_dir):
+            # Not a dir, raise an exception
+            raise ValueError("{} is not a directory".format(verify_dir))
+
+
+def find_netmiko_dir():
+    """Check environment first, then default dir"""
+    try:
+        netmiko_base_dir = os.environ['NETMIKO_DIR']
+    except KeyError:
+        netmiko_base_dir = NETMIKO_BASE_DIR
+    print('zzz')
+    netmiko_base_dir = os.path.expanduser(netmiko_base_dir)
+    if netmiko_base_dir == '/':
+        raise ValueError("/ cannot be netmiko_base_dir")
+    netmiko_full_dir = "{}/tmp".format(netmiko_base_dir)
+    return (netmiko_base_dir, netmiko_full_dir)
+
+    
 def ssh_conn(device_name, a_device, cli_command, output_q):
     net_connect = ConnectHandler(**a_device)
     net_connect.enable()
@@ -121,8 +156,8 @@ def main(args):
             else:
                 device_group[device_or_group] = devicedict_or_group
         except KeyError:
-            sys.exit("Error reading from .netmiko.cfg file."
-                     " Device or group not found: {0}".format(device_or_group))
+            return "Error reading from .netmiko.cfg file." \
+                   " Device or group not found: {0}".format(device_or_group)
 
     # Retrieve output from devices
     my_files = []
@@ -133,20 +168,17 @@ def main(args):
             my_thread = threading.Thread(target=ssh_conn, args=(device_name, a_device,
                                                                 cli_command, output_q))
             my_thread.start()
-
         # Make sure all threads have finished
         main_thread = threading.currentThread()
         for some_thread in threading.enumerate():
             if some_thread != main_thread:
                 some_thread.join()
-
         # Write files
         while not output_q.empty():
             my_dict = output_q.get()
             for device_name, output in my_dict.items():
                 file_name = write_tmp_file(device_name, output)
                 my_files.append(file_name)
-
     else:
         for device_name in device_group:
             file_name = obtain_file_name(device_name)
