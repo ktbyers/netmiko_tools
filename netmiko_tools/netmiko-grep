@@ -32,6 +32,8 @@ from datetime import datetime
 from netmiko import ConnectHandler
 from netmiko.utilities import load_yaml_file, load_devices, display_inventory
 from netmiko.utilities import obtain_all_devices
+from netmiko.utilities import obtain_netmiko_filename, write_tmp_file, ensure_dir_exists
+from netmiko.utilities import find_netmiko_dir
 from netmiko.utilities import SHOW_RUN_MAPPER
 from pprint import pprint
 
@@ -49,47 +51,6 @@ def grepx(files, pattern, grep_options, use_colors=True):
     proc = subprocess.Popen(grep_list, shell=False)
     proc.communicate()
     return ''
-
-
-def obtain_netmiko_filename(device_name):
-    """Create file name based on device_name."""
-    (netmiko_base_dir, netmiko_full_dir) = find_netmiko_dir()
-    # Make sure directories exist (create if necessary)
-    ensure_dir_exists(netmiko_base_dir)
-    ensure_dir_exists(netmiko_full_dir)
-    return "{}/{}.txt".format(netmiko_full_dir, device_name)
-
-
-def write_tmp_file(device_name, output):
-    file_name = obtain_netmiko_filename(device_name)
-    with open(file_name, "w") as f:
-        f.write(output)
-    return file_name
-
-
-def ensure_dir_exists(verify_dir):
-    """Ensure directory exists. Create if necessary."""
-    if not os.path.exists(verify_dir):
-        # Doesn't exist create dir
-        os.makedirs(verify_dir)
-    else:
-        # Exists
-        if not os.path.isdir(verify_dir):
-            # Not a dir, raise an exception
-            raise ValueError("{} is not a directory".format(verify_dir))
-
-
-def find_netmiko_dir():
-    """Check environment first, then default dir"""
-    try:
-        netmiko_base_dir = os.environ['NETMIKO_DIR']
-    except KeyError:
-        netmiko_base_dir = NETMIKO_BASE_DIR
-    netmiko_base_dir = os.path.expanduser(netmiko_base_dir)
-    if netmiko_base_dir == '/':
-        raise ValueError("/ cannot be netmiko_base_dir")
-    netmiko_full_dir = "{}/tmp".format(netmiko_base_dir)
-    return (netmiko_base_dir, netmiko_full_dir)
 
     
 def ssh_conn(device_name, a_device, cli_command, output_q):
