@@ -4,14 +4,13 @@ Create grep like remote behavior on show run or command output
 
 ToDo:
 2. No support for grep options
-3. Unit tests
 4. Test on larger set of devices >50
 5. Write to ~/.netmiko directory
-6. Look for .netmiko.cfg in local dir then ~
 7. Remove files (what about cache)
 8. Test on windows
-9. Test username/password arguments
+9. Add username/password arguments
 10. Support JSON output
+11. use-cache is problem if command before wasn't running config
 """
 
 from __future__ import print_function
@@ -81,7 +80,7 @@ def parse_arguments(args):
                         action="store", default=None, type=str)
     parser.add_argument("--username", help="Username", action="store", type=str)
     parser.add_argument("--password", help="Password", action="store", type=str)
-    parser.add_argument("--use_cache", help="Use cached files", action="store_true")
+    parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     cli_args = parser.parse_args(args)
     if not cli_args.list_devices:
