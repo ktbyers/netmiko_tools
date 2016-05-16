@@ -133,6 +133,9 @@ def main(args):
         # Write files
         while not output_q.empty():
             my_dict = output_q.get()
+            netmiko_base_dir, netmiko_full_dir = find_netmiko_dir()
+            ensure_dir_exists(netmiko_base_dir)
+            ensure_dir_exists(netmiko_full_dir)
             for device_name, output in my_dict.items():
                 file_name = write_tmp_file(device_name, output)
                 my_files.append(file_name)
