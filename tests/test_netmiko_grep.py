@@ -6,6 +6,12 @@ from __future__ import unicode_literals
 import time
 import subprocess
 import re
+import os
+import shutil
+import uuid
+
+from netmiko.utilities import obtain_netmiko_filename, write_tmp_file, ensure_dir_exists
+from netmiko.utilities import find_netmiko_dir
 
 NETMIKO_GREP = '/home/gituser/netmiko_tools/netmiko_tools/netmiko-grep'
 
@@ -147,7 +153,7 @@ def test_use_cache():
     # Generate cached files
     cmd_list = [NETMIKO_GREP] + ['interface', 'all']
     subprocess_handler(cmd_list)
-    cmd_list = [NETMIKO_GREP] + ['--use-cache', 'interface', 'all']
+    cmd_list = [NETMIKO_GREP] + ['--use-cache', '--display-runtime', 'interface', 'all']
     (output, std_err) = subprocess_handler(cmd_list)
     match = re.search("Total time: (0:.*)$", output)
     time = match.group(1)
@@ -155,3 +161,38 @@ def test_use_cache():
     seconds = float(seconds)
     assert seconds <= 1
     assert '/tmp/pynet_rtr1.txt:interface FastEthernet0' in output
+
+
+def test_find_netmiko_dir():
+    """Test function that finds netmiko_dir."""
+    base_dir_check = '/home/gituser/.netmiko'
+    full_dir_check = '/home/gituser/.netmiko/tmp'
+    base_dir, full_dir = find_netmiko_dir()
+    assert base_dir == base_dir_check and full_dir == full_dir_check
+
+
+def test_obtain_netmiko_filename():
+    """Test file name and that directory is created."""
+    create_dir_test = True
+    file_name_test = '/home/gituser/.netmiko/tmp/test_device.txt'
+    file_name = obtain_netmiko_filename('test_device')
+    assert file_name == file_name_test
+
+    if create_dir_test:
+        uuid_str = str(uuid.uuid1())
+        junk_dir_base = '/home/gituser/JUNK/netmiko'
+        junk_dir = '{}/{}'.format(junk_dir_base, uuid_str)
+        base_dir, full_dir = find_netmiko_dir()
+        print(base_dir)
+
+        # Move base_dir and recreate it
+        if os.path.isdir(base_dir) and os.path.isdir(junk_dir_base):
+            shutil.move(src=base_dir, dst=junk_dir)
+        assert os.path.exists(base_dir) == False
+        assert os.path.exists(full_dir) == False
+        file_name = obtain_netmiko_filename('test_device')
+        ensure_dir_exists(base_dir)
+        ensure_dir_exists(full_dir)
+        assert os.path.exists(base_dir) == True
+        assert os.path.exists(full_dir) == True
+
