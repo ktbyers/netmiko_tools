@@ -1,19 +1,5 @@
 #!/usr/bin/env python
-"""
-Create grep like remote behavior on show run or command output
-
-ToDo:
-1. No support for grep options
-2. Test on larger set of devices >50
-*3. Write to ~/.netmiko directory (FIX)
-4. Remove files (what about cache)
-5. Test on windows
-*6. Add username/password arguments (REMOVE?)
-7. Support JSON output
-8. use-cache is problem if command before wasn't running config
-9. Handling failed authentications so it doesn't try to write the file
-"""
-
+"""Create grep like remote behavior on show run or command output."""
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -63,15 +49,15 @@ def ssh_conn(device_name, a_device, cli_command, output_q):
 
 def parse_arguments(args):
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Grep pattern search on Netmiko output")
+    parser = argparse.ArgumentParser(description="Grep pattern search on Netmiko output (defaults to running-config)")
     arg_pattern = parser.add_argument("pattern", nargs='?', help="Pattern to search for",
                                       action="store", type=str)
     arg_devices = parser.add_argument("devices", nargs='?', help="Device or group to connect to",
                                       action="store", type=str)
     parser.add_argument("--cmd", help="Remote command to execute",
                         action="store", default=None, type=str)
-    parser.add_argument("--username", help="Username", action="store", type=str)
-    parser.add_argument("--password", help="Password", action="store", type=str)
+    #parser.add_argument("--username", help="Username", action="store", type=str)
+    #parser.add_argument("--password", help="Password", action="store", type=str)
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
