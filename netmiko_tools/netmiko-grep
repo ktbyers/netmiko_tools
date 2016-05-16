@@ -74,6 +74,7 @@ def parse_arguments(args):
     parser.add_argument("--password", help="Password", action="store", type=str)
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
+    parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
     cli_args = parser.parse_args(args)
     if not cli_args.list_devices:
         if not cli_args.devices or not cli_args.pattern:
@@ -141,12 +142,13 @@ def main(args):
                 my_files.append(file_name)
     else:
         for device_name in device_group:
-            file_name = obtain_file_name(device_name)
+            file_name = obtain_netmiko_filename(device_name)
             my_files.append(file_name)
 
     grep_options = []
     grepx(my_files, pattern, grep_options)
-    print("Total time: {0}".format(datetime.now() - start_time))
+    if cli_args.display_runtime:
+        print("Total time: {0}".format(datetime.now() - start_time))
     return 0
 
 if __name__ == "__main__":
