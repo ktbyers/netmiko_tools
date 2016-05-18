@@ -1,3 +1,5 @@
+---
+
 # Dictionary is devices
 pynet_rtr1:
     device_type: cisco_ios
