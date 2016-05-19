@@ -26,6 +26,13 @@ def subprocess_handler(cmd_list):
     return (output, std_err)
 
 
+def test_version():
+    cmd_list = [NETMIKO_GREP] + ['--version']
+    (output, std_err) = subprocess_handler(cmd_list)
+    assert 'netmiko-grep v0.' in output.strip()
+    assert std_err == ''
+
+
 def test_list_devices():
     cmd_list = [NETMIKO_GREP] + ['--list-devices']
     output_patterns = ['Devices', 'Groups', 'pynet_rtr1', 'all', 'cisco']
@@ -66,18 +73,18 @@ def test_single_device():
 def test_group():
     cmd_list = [NETMIKO_GREP] + ['interface', 'cisco']
     output_patterns = [
-        '/tmp/pynet_rtr2.txt:interface FastEthernet0',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet1',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet2',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet3',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet4',
-        '/tmp/pynet_rtr2.txt:interface Vlan1',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet0',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet1',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet2',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet3',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet4',
-        '/tmp/pynet_rtr1.txt:interface Vlan1',
+        'pynet_rtr2.txt:interface FastEthernet0',
+        'pynet_rtr2.txt:interface FastEthernet1',
+        'pynet_rtr2.txt:interface FastEthernet2',
+        'pynet_rtr2.txt:interface FastEthernet3',
+        'pynet_rtr2.txt:interface FastEthernet4',
+        'pynet_rtr2.txt:interface Vlan1',
+        'pynet_rtr1.txt:interface FastEthernet0',
+        'pynet_rtr1.txt:interface FastEthernet1',
+        'pynet_rtr1.txt:interface FastEthernet2',
+        'pynet_rtr1.txt:interface FastEthernet3',
+        'pynet_rtr1.txt:interface FastEthernet4',
+        'pynet_rtr1.txt:interface Vlan1',
     ]
     (output, std_err) = subprocess_handler(cmd_list)
     for pattern in output_patterns:
@@ -88,36 +95,36 @@ def test_group():
 def test_group_all():
     cmd_list = [NETMIKO_GREP] + ['interface', 'all']
     output_patterns = [
-        '/tmp/pynet_rtr2.txt:interface FastEthernet0',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet1',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet2',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet3',
-        '/tmp/pynet_rtr2.txt:interface FastEthernet4',
-        '/tmp/pynet_rtr2.txt:interface Vlan1',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet0',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet1',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet2',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet3',
-        '/tmp/pynet_rtr1.txt:interface FastEthernet4',
-        '/tmp/pynet_rtr1.txt:interface Vlan1',
-        '/tmp/cisco_asa.txt:interface Ethernet0/0',
-        '/tmp/cisco_asa.txt:interface Vlan1',
-        '/tmp/cisco_xrv.txt:interface MgmtEth0/0/CPU0/0',
-        '/tmp/cisco_xrv.txt:interface GigabitEthernet0/0/0/0',
-        '/tmp/juniper_srx.txt:                interface vlan.0;',
-        '/tmp/juniper_srx.txt:        l3-interface vlan.0;',
-        '/tmp/arista_sw1.txt:interface Ethernet1',
-        '/tmp/arista_sw2.txt:interface Ethernet1',
-        '/tmp/arista_sw2.txt:interface Ethernet2',
-        '/tmp/arista_sw2.txt:interface Ethernet3',
-        '/tmp/arista_sw2.txt:interface Ethernet4',
-        '/tmp/arista_sw2.txt:interface Ethernet5',
-        '/tmp/arista_sw2.txt:interface Ethernet6',
-        '/tmp/arista_sw2.txt:interface Ethernet7',
-        '/tmp/arista_sw2.txt:interface Management1',
-        '/tmp/arista_sw2.txt:interface Vlan1',
-        '/tmp/arista_sw3.txt:interface Ethernet1',
-        '/tmp/arista_sw4.txt:interface Ethernet1',
+        'pynet_rtr2.txt:interface FastEthernet0',
+        'pynet_rtr2.txt:interface FastEthernet1',
+        'pynet_rtr2.txt:interface FastEthernet2',
+        'pynet_rtr2.txt:interface FastEthernet3',
+        'pynet_rtr2.txt:interface FastEthernet4',
+        'pynet_rtr2.txt:interface Vlan1',
+        'pynet_rtr1.txt:interface FastEthernet0',
+        'pynet_rtr1.txt:interface FastEthernet1',
+        'pynet_rtr1.txt:interface FastEthernet2',
+        'pynet_rtr1.txt:interface FastEthernet3',
+        'pynet_rtr1.txt:interface FastEthernet4',
+        'pynet_rtr1.txt:interface Vlan1',
+        'cisco_asa.txt:interface Ethernet0/0',
+        'cisco_asa.txt:interface Vlan1',
+        'cisco_xrv.txt:interface MgmtEth0/0/CPU0/0',
+        'cisco_xrv.txt:interface GigabitEthernet0/0/0/0',
+        'juniper_srx.txt:                interface vlan.0;',
+        'juniper_srx.txt:        l3-interface vlan.0;',
+        'arista_sw1.txt:interface Ethernet1',
+        'arista_sw2.txt:interface Ethernet1',
+        'arista_sw2.txt:interface Ethernet2',
+        'arista_sw2.txt:interface Ethernet3',
+        'arista_sw2.txt:interface Ethernet4',
+        'arista_sw2.txt:interface Ethernet5',
+        'arista_sw2.txt:interface Ethernet6',
+        'arista_sw2.txt:interface Ethernet7',
+        'arista_sw2.txt:interface Management1',
+        'arista_sw2.txt:interface Vlan1',
+        'arista_sw3.txt:interface Ethernet1',
+        'arista_sw4.txt:interface Ethernet1',
     ]
     (output, std_err) = subprocess_handler(cmd_list)
     for pattern in output_patterns:
@@ -139,8 +146,8 @@ def test_cmd_single_device():
 def test_cmd_group():
     cmd_list = [NETMIKO_GREP] + ['--cmd', 'show arp', '10.220.88.', 'cisco']
     output_patterns = [
-        '/tmp/pynet_rtr1.txt:Internet  10.220.88.20            -   c89c.1dea.0eb6  ARPA',
-        '/tmp/pynet_rtr2.txt:Internet  10.220.88.21            -   1c6a.7aaf.576c  ARPA',
+        'pynet_rtr1.txt:Internet  10.220.88.20            -   c89c.1dea.0eb6  ARPA',
+        'pynet_rtr2.txt:Internet  10.220.88.21            -   1c6a.7aaf.576c  ARPA',
     ]
     (output, std_err) = subprocess_handler(cmd_list)
     for pattern in output_patterns:
@@ -160,7 +167,7 @@ def test_use_cache():
     _, _, seconds = time.split(":")
     seconds = float(seconds)
     assert seconds <= 1
-    assert '/tmp/pynet_rtr1.txt:interface FastEthernet0' in output
+    assert 'pynet_rtr1.txt:interface FastEthernet0' in output
 
 
 def test_find_netmiko_dir():

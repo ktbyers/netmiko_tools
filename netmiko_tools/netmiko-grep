@@ -25,6 +25,7 @@ from pprint import pprint
 
 GREP = '/bin/grep'
 NETMIKO_BASE_DIR = '~/.netmiko'
+__version__ = '0.0.2'
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -69,8 +70,9 @@ def parse_arguments(args):
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
+    parser.add_argument("--version", help="Display version", action="store_true")
     cli_args = parser.parse_args(args)
-    if not cli_args.list_devices:
+    if not cli_args.list_devices and not cli_args.version:
         if not cli_args.devices or not cli_args.pattern:
             parser.error('Grep pattern or devices not specified.')
     return cli_args
@@ -80,6 +82,10 @@ def main(args):
     start_time = datetime.now()
     cli_args = parse_arguments(args)
 
+    version = cli_args.version
+    if version:
+        print("netmiko-grep v{}".format(__version__))
+        return 0
     list_devices = cli_args.list_devices
     if list_devices:
         my_devices = load_devices()
@@ -108,7 +114,7 @@ def main(args):
             else:
                 device_group[device_or_group] = devicedict_or_group
         except KeyError:
-            return "Error reading from .netmiko.cfg file." \
+            return "Error reading from netmiko devices file." \
                    " Device or group not found: {0}".format(device_or_group)
 
     # Retrieve output from devices
