@@ -8,7 +8,7 @@ Python 2.7, 3.3, 3.4, 3.5
   
 <br>
 ##### Requires: #####
-netmiko >= 0.5.0  
+netmiko >= 0.5.1  
 pyyaml  
 pytest (for unit tests)   
   
