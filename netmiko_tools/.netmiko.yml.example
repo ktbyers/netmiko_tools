@@ -1,21 +1,90 @@
 ---
 
-# Dictionary is devices
+# Dictionaries are devices
 pynet_rtr1:
-    device_type: cisco_ios
-    ip: 10.10.10.27
-    username: admin
-    password: password1
-    port: 22
+  device_type: cisco_ios
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
 
 pynet_rtr2:
-    device_type: cisco_ios
-    ip: 10.10.10.27
-    username: admin
-    password: password1
-    port: 8022
+  device_type: cisco_ios
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  port: 2022
 
-# Any list is group of devices
+arista_sw1:
+  device_type: arista_eos
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ""
+  port: 2222
+
+arista_sw2:
+  device_type: arista_eos
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ""
+  port: 2322
+
+arista_sw3:
+  device_type: arista_eos
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ""
+  port: 2422
+
+arista_sw4:
+  device_type: arista_eos
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ""
+  port: 2522
+
+juniper_srx:
+  device_type: juniper
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ''
+  port: 2822
+
+cisco_asa:
+  device_type: cisco_asa
+  ip: 10.10.10.26
+  username: admin
+  password: mypasswd
+  secret: mypasswd
+
+hp_procurve:
+  device_type: hp_procurve
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ''
+  port: 2922
+
+cisco_xrv:
+  device_type: cisco_xr
+  ip: 10.10.10.27
+  username: admin
+  password: mypasswd
+  secret: ''
+  port: 2722
+
+
+# Lists are groups of devices
 cisco:
-    - pynet_rtr1
-    - pynet_rtr2
+  - pynet_rtr1
+  - pynet_rtr2
+
+arista:
+  - arista_sw1
+  - arista_sw2
+  - arista_sw3
+  - arista_sw4
