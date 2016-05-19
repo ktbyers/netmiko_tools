@@ -33,6 +33,14 @@ def grepx(files, pattern, grep_options, use_colors=True):
         files = [files]
     if use_colors:
         grep_options += ['--color=auto']
+    
+    # Make grep output look nicer by 'cd netmiko_full_dir'
+    _, netmiko_full_dir = find_netmiko_dir()
+    os.chdir(netmiko_full_dir)
+    # Convert files to strip off the directory
+    retrieve_file = lambda x: x.split('/')[-1]
+    files = [retrieve_file(a_file) for a_file in files]
+    files.sort()
     grep_list = [GREP] + grep_options + [pattern] + files
     proc = subprocess.Popen(grep_list, shell=False)
     proc.communicate()
