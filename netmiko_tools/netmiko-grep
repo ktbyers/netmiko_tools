@@ -24,8 +24,11 @@ from netmiko.utilities import SHOW_RUN_MAPPER
 from pprint import pprint
 
 GREP = '/bin/grep'
+if not os.path.exists(GREP):
+    GREP = '/usr/bin/grep'
 NETMIKO_BASE_DIR = '~/.netmiko'
-__version__ = '0.0.2'
+ERROR_PATTERN = "%%%failed%%%"
+__version__ = '0.0.3'
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -49,10 +52,13 @@ def grepx(files, pattern, grep_options, use_colors=True):
 
     
 def ssh_conn(device_name, a_device, cli_command, output_q):
-    net_connect = ConnectHandler(**a_device)
-    net_connect.enable()
-    output = net_connect.send_command_expect(cli_command)
-    net_connect.disconnect()
+    try:
+        net_connect = ConnectHandler(**a_device)
+        net_connect.enable()
+        output = net_connect.send_command_expect(cli_command)
+        net_connect.disconnect()
+    except Exception as e:
+        output = ERROR_PATTERN
     output_q.put({device_name: output})
 
 
@@ -70,6 +76,7 @@ def parse_arguments(args):
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
+    parser.add_argument("--display-failed", help="Display failed devices", action="store_true")
     parser.add_argument("--version", help="Display version", action="store_true")
     cli_args = parser.parse_args(args)
     if not cli_args.list_devices and not cli_args.version:
@@ -99,6 +106,7 @@ def main(args):
     device_or_group = cli_args.devices.strip()
     pattern = cli_args.pattern
     use_cached_files = cli_args.use_cache
+    display_failed = cli_args.display_failed
 
     output_q = Queue()
     my_devices = load_devices()
@@ -119,6 +127,7 @@ def main(args):
 
     # Retrieve output from devices
     my_files = []
+    failed_devices = []
     if not use_cached_files:
         for device_name, a_device in device_group.items():
             if not cmd_arg:
@@ -139,16 +148,34 @@ def main(args):
             ensure_dir_exists(netmiko_full_dir)
             for device_name, output in my_dict.items():
                 file_name = write_tmp_file(device_name, output)
-                my_files.append(file_name)
+                if not ERROR_PATTERN in output:
+                    my_files.append(file_name)
+                else:
+                    failed_devices.append(device_name)
     else:
         for device_name in device_group:
             file_name = obtain_netmiko_filename(device_name)
-            my_files.append(file_name)
+            with open(file_name) as f:
+                output = f.read()
+            if not ERROR_PATTERN in output:
+                my_files.append(file_name)
+            else:
+                failed_devices.append(device_name)
 
     grep_options = []
     grepx(my_files, pattern, grep_options)
     if cli_args.display_runtime:
         print("Total time: {0}".format(datetime.now() - start_time))
+
+    if display_failed:
+        if failed_devices:
+            print("\n")
+            print("-" * 20)
+            print("Failed devices:")
+            failed_devices.sort()
+            for device_name in failed_devices:
+                print("  {}".format(device_name))
+            print()
     return 0
 
 if __name__ == "__main__":
