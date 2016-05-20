@@ -76,7 +76,7 @@ def parse_arguments(args):
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
-    parser.add_argument("--display-failed", help="Display failed devices", action="store_true")
+    parser.add_argument("--hide-failed", help="Hide failed devices", action="store_true")
     parser.add_argument("--version", help="Display version", action="store_true")
     cli_args = parser.parse_args(args)
     if not cli_args.list_devices and not cli_args.version:
@@ -106,7 +106,7 @@ def main(args):
     device_or_group = cli_args.devices.strip()
     pattern = cli_args.pattern
     use_cached_files = cli_args.use_cache
-    display_failed = cli_args.display_failed
+    hide_failed = cli_args.hide_failed
 
     output_q = Queue()
     my_devices = load_devices()
@@ -155,8 +155,11 @@ def main(args):
     else:
         for device_name in device_group:
             file_name = obtain_netmiko_filename(device_name)
-            with open(file_name) as f:
-                output = f.read()
+            try:
+                with open(file_name) as f:
+                    output = f.read()
+            except IOError:
+                return("Some cache files are missing: unable to use --use-cache option.")
             if not ERROR_PATTERN in output:
                 my_files.append(file_name)
             else:
@@ -167,7 +170,7 @@ def main(args):
     if cli_args.display_runtime:
         print("Total time: {0}".format(datetime.now() - start_time))
 
-    if display_failed:
+    if not hide_failed:
         if failed_devices:
             print("\n")
             print("-" * 20)

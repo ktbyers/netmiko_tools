@@ -16,13 +16,16 @@ from netmiko.utilities import find_netmiko_dir
 NETMIKO_GREP = '/home/gituser/netmiko_tools/netmiko_tools/netmiko-grep'
 
 def convert_bytes_to_str(my_bytes):
-    return my_bytes.decode("utf-8") 
+    try:
+        return my_bytes.decode("utf-8")
+    except AttributeError:
+        return my_bytes
 
 
 def subprocess_handler(cmd_list):
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    proc_results = proc.communicate()
-    (output, std_err) = [convert_bytes_to_str(x) for x in proc_results]
+    results = proc.communicate()
+    (output, std_err) = [convert_bytes_to_str(x) for x in results]
     return (output, std_err)
 
 
@@ -162,12 +165,46 @@ def test_use_cache():
     subprocess_handler(cmd_list)
     cmd_list = [NETMIKO_GREP] + ['--use-cache', '--display-runtime', 'interface', 'all']
     (output, std_err) = subprocess_handler(cmd_list)
-    match = re.search("Total time: (0:.*)$", output)
+    match = re.search(r"Total time: (0:.*)", output)
     time = match.group(1)
     _, _, seconds = time.split(":")
     seconds = float(seconds)
     assert seconds <= 1
     assert 'pynet_rtr1.txt:interface FastEthernet0' in output
+
+
+def test_use_cache_missing_file():
+    """Test use_cache with a missing cache file. Should generate error."""
+    # Generate cached files
+    cmd_list = [NETMIKO_GREP] + ['interface', 'all']
+    _, full_dir = find_netmiko_dir()
+    remove_file = 'bad_device.txt'
+    remove_file_full = "{}/{}".format(full_dir, remove_file)
+    if os.path.exists(remove_file_full) and os.path.isfile(remove_file_full):
+        os.remove(remove_file_full)
+    cmd_list = [NETMIKO_GREP] + ['--use-cache', '--display-runtime', 'interface', 'all']
+    (output, std_err) = subprocess_handler(cmd_list)
+    assert "Some cache files are missing: unable to use --use-cache option." in std_err
+
+
+def test_display_failed():
+    """Verify failed devices are showing"""
+    cmd_list = [NETMIKO_GREP] + ['interface', 'all']
+    (output, std_err) = subprocess_handler(cmd_list)
+    assert "Failed devices" in output
+    failed_devices = output.split("Failed devices:")[1]
+    failed_devices = failed_devices.strip().split("\n")
+    failed_devices = [x.strip() for x in failed_devices]
+    assert len(failed_devices) == 2
+    assert "bad_device" in failed_devices
+    assert "bad_port" in failed_devices
+
+
+def test_hide_failed():
+    """Verify failed devices are showing"""
+    cmd_list = [NETMIKO_GREP] + ['--hide-failed', 'interface', 'all']
+    (output, std_err) = subprocess_handler(cmd_list)
+    assert "Failed devices" not in output
 
 
 def test_find_netmiko_dir():
