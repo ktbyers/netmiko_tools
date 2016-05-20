@@ -1,10 +1,15 @@
 netmiko_tools
 =============
 
-Netmiko CLI Tools
+Netmiko CLI Tools  
   
 Python 2.7, 3.3, 3.4, 3.5  
   
+  
+For detailed description on netmiko-grep see:  
+  
+https://pynet.twb-tech.com/blog/automation/netmiko-grep.html  
+
   
 <br>
 ##### Requires: #####
