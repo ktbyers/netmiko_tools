@@ -1,3 +1,2 @@
-netmiko>=0.5.1
-pytest>=2.6.0
+netmiko>=1.0.0
 pyyaml
