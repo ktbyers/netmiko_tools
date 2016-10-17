@@ -16,7 +16,7 @@ https://pynet.twb-tech.com/blog/automation/netmiko-grep.html
   
 <br>
 ##### Requires: #####
-netmiko >= 1.0.0
+netmiko >= 1.0.0  
 pyyaml  
   
   
