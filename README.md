@@ -14,9 +14,8 @@ https://pynet.twb-tech.com/blog/automation/netmiko-grep.html
   
 <br>
 ##### Requires: #####
-netmiko >= 0.5.1  
+netmiko >= 1.0.0
 pyyaml  
-pytest (for unit tests)   
   
   
 <br>      
@@ -25,4 +24,3 @@ Kirk Byers
 Python for Network Engineers  
 https://pynet.twb-tech.com
 
- 
