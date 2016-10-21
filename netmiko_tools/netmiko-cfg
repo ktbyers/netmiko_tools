@@ -109,6 +109,9 @@ def main(args):
     cmd_arg = False
     if cli_command:
         cmd_arg = True
+    if r'\n' in cli_command:
+        cli_command = cli_command.strip()
+        cli_command = cli_command.split(r'\n')
     device_or_group = cli_args.devices.strip()
     pattern = r"."
     hide_failed = cli_args.hide_failed
