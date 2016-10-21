@@ -17,7 +17,7 @@ from datetime import datetime
 from netmiko import ConnectHandler
 from netmiko.utilities import load_devices, display_inventory
 from netmiko.utilities import obtain_all_devices
-from netmiko.utilities import obtain_netmiko_filename, write_tmp_file, ensure_dir_exists
+from netmiko.utilities import write_tmp_file, ensure_dir_exists
 from netmiko.utilities import find_netmiko_dir
 from netmiko.utilities import SHOW_RUN_MAPPER
 
@@ -27,6 +27,16 @@ if not os.path.exists(GREP):
 NETMIKO_BASE_DIR = '~/.netmiko'
 ERROR_PATTERN = "%%%failed%%%"
 __version__ = '0.0.1'
+
+PY2 = sys.version_info.major == 2
+PY3 = sys.version_info.major == 3
+
+if sys.version_info.major == 3:
+    string_types = (str,)
+    text_type = str
+else:
+    string_types = (basestring,)  # noqa
+    text_type = unicode  # noqa
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -49,11 +59,13 @@ def grepx(files, pattern, grep_options, use_colors=True):
     return ''
 
 
-def ssh_conn(device_name, a_device, cli_command, output_q):
+def ssh_conn(device_name, a_device, cfg_command, output_q):
     try:
         net_connect = ConnectHandler(**a_device)
         net_connect.enable()
-        output = net_connect.send_command_expect(cli_command)
+        if isinstance(cfg_command, string_types):
+            cfg_command = [cfg_command]
+        output = net_connect.send_config_set(cfg_command)
         net_connect.disconnect()
     except Exception:
         output = ERROR_PATTERN
@@ -62,13 +74,12 @@ def ssh_conn(device_name, a_device, cli_command, output_q):
 
 def parse_arguments(args):
     """Parse command-line arguments."""
-    description = "Return output from single show cmd using Netmiko (defaults to running-config)"
+    description = "Execute single config cmd using Netmiko"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("devices", nargs='?', help="Device or group to connect to",
                         action="store", type=str)
-    parser.add_argument("--cmd", help="Remote command to execute",
+    parser.add_argument("--cmd", help="Config command to execute",
                         action="store", default=None, type=str)
-    parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
     parser.add_argument("--hide-failed", help="Hide failed devices", action="store_true")
@@ -86,7 +97,7 @@ def main(args):
 
     version = cli_args.version
     if version:
-        print("netmiko-show v{}".format(__version__))
+        print("netmiko-cfg v{}".format(__version__))
         return 0
     list_devices = cli_args.list_devices
     if list_devices:
@@ -100,7 +111,6 @@ def main(args):
         cmd_arg = True
     device_or_group = cli_args.devices.strip()
     pattern = r"."
-    use_cached_files = cli_args.use_cache
     hide_failed = cli_args.hide_failed
 
     output_q = Queue()
@@ -123,38 +133,25 @@ def main(args):
     # Retrieve output from devices
     my_files = []
     failed_devices = []
-    if not use_cached_files:
-        for device_name, a_device in device_group.items():
-            if not cmd_arg:
-                cli_command = SHOW_RUN_MAPPER.get(a_device['device_type'], 'show run')
-            my_thread = threading.Thread(target=ssh_conn, args=(device_name, a_device,
-                                                                cli_command, output_q))
-            my_thread.start()
-        # Make sure all threads have finished
-        main_thread = threading.currentThread()
-        for some_thread in threading.enumerate():
-            if some_thread != main_thread:
-                some_thread.join()
-        # Write files
-        while not output_q.empty():
-            my_dict = output_q.get()
-            netmiko_base_dir, netmiko_full_dir = find_netmiko_dir()
-            ensure_dir_exists(netmiko_base_dir)
-            ensure_dir_exists(netmiko_full_dir)
-            for device_name, output in my_dict.items():
-                file_name = write_tmp_file(device_name, output)
-                if ERROR_PATTERN not in output:
-                    my_files.append(file_name)
-                else:
-                    failed_devices.append(device_name)
-    else:
-        for device_name in device_group:
-            file_name = obtain_netmiko_filename(device_name)
-            try:
-                with open(file_name) as f:
-                    output = f.read()
-            except IOError:
-                return("Some cache files are missing: unable to use --use-cache option.")
+    for device_name, a_device in device_group.items():
+        if not cmd_arg:
+            cli_command = SHOW_RUN_MAPPER.get(a_device['device_type'], 'show run')
+        my_thread = threading.Thread(target=ssh_conn, args=(device_name, a_device,
+                                                            cli_command, output_q))
+        my_thread.start()
+    # Make sure all threads have finished
+    main_thread = threading.currentThread()
+    for some_thread in threading.enumerate():
+        if some_thread != main_thread:
+            some_thread.join()
+    # Write files
+    while not output_q.empty():
+        my_dict = output_q.get()
+        netmiko_base_dir, netmiko_full_dir = find_netmiko_dir()
+        ensure_dir_exists(netmiko_base_dir)
+        ensure_dir_exists(netmiko_full_dir)
+        for device_name, output in my_dict.items():
+            file_name = write_tmp_file(device_name, output)
             if ERROR_PATTERN not in output:
                 my_files.append(file_name)
             else:

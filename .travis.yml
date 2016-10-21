@@ -13,3 +13,4 @@ install:
 script: 
   - pylama -F netmiko_tools/netmiko-grep
   - pylama -F netmiko_tools/netmiko-show
+  - pylama -F netmiko_tools/netmiko-cfg
