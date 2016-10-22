@@ -94,6 +94,7 @@ def parse_arguments(args):
         parser.error("No configuration commands provided.")
     return cli_args
 
+
 def main(args):
     start_time = datetime.now()
     cli_args = parse_arguments(args)
