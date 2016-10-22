@@ -78,6 +78,8 @@ def parse_arguments(args):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("devices", nargs='?', help="Device or group to connect to",
                         action="store", type=str)
+    parser.add_argument("--infile", help="Read commands from file", type=argparse.FileType('r'),
+                        default=sys.stdin)
     parser.add_argument("--cmd", help="Config command to execute",
                         action="store", default=None, type=str)
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
@@ -88,8 +90,9 @@ def parse_arguments(args):
     if not cli_args.list_devices and not cli_args.version:
         if not cli_args.devices:
             parser.error('Devices not specified.')
+    if not cli_args.cmd and not cli_args.infile:
+        parser.error("No configuration commands provided.")
     return cli_args
-
 
 def main(args):
     start_time = datetime.now()
@@ -109,9 +112,16 @@ def main(args):
     cmd_arg = False
     if cli_command:
         cmd_arg = True
-    if r'\n' in cli_command:
-        cli_command = cli_command.strip()
-        cli_command = cli_command.split(r'\n')
+        if r'\n' in cli_command:
+            cli_command = cli_command.strip()
+            cli_command = cli_command.split(r'\n')
+    elif input:
+        cmd_arg = True
+        command_data = cli_args.infile.read()
+        command_data = command_data.strip()
+        cli_command = command_data.splitlines()
+    else:
+        raise ValueError("No configuration commands provided.")
     device_or_group = cli_args.devices.strip()
     pattern = r"."
     hide_failed = cli_args.hide_failed
