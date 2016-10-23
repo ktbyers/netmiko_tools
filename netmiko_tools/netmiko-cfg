@@ -78,8 +78,7 @@ def parse_arguments(args):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("devices", nargs='?', help="Device or group to connect to",
                         action="store", type=str)
-    parser.add_argument("--infile", help="Read commands from file", type=argparse.FileType('r'),
-                        default=sys.stdin)
+    parser.add_argument("--infile", help="Read commands from file", type=argparse.FileType('r'))
     parser.add_argument("--cmd", help="Config command to execute",
                         action="store", default=None, type=str)
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
