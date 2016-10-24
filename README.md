@@ -10,16 +10,17 @@ Python 2.7, 3.3, 3.4, 3.5
    
   
 <br>
-##### Requires: #####
-netmiko >= 1.0.0  
-pyyaml  
-  
-  
-<br>
 ##### Tutorials: #####
 https://pynet.twb-tech.com/blog/automation/netmiko-grep.html  
   
 https://pynet.twb-tech.com/blog/automation/netmiko-tools.html  
+  
+  
+  
+<br>
+##### Requires: #####
+netmiko >= 1.0.0  
+pyyaml  
   
   
   
