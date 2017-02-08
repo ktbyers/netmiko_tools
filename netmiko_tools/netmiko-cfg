@@ -26,7 +26,7 @@ if not os.path.exists(GREP):
     GREP = '/usr/bin/grep'
 NETMIKO_BASE_DIR = '~/.netmiko'
 ERROR_PATTERN = "%%%failed%%%"
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 PY2 = sys.version_info.major == 2
 PY3 = sys.version_info.major == 3
@@ -89,8 +89,8 @@ def parse_arguments(args):
     if not cli_args.list_devices and not cli_args.version:
         if not cli_args.devices:
             parser.error('Devices not specified.')
-    if not cli_args.cmd and not cli_args.infile:
-        parser.error("No configuration commands provided.")
+        if not cli_args.cmd and not cli_args.infile:
+            parser.error("No configuration commands provided.")
     return cli_args
 
 
