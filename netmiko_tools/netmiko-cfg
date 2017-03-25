@@ -81,6 +81,8 @@ def parse_arguments(args):
     parser.add_argument("--infile", help="Read commands from file", type=argparse.FileType('r'))
     parser.add_argument("--cmd", help="Config command to execute",
                         action="store", default=None, type=str)
+    parser.add_argument("--invfile", help="Inventory File to use for processing",
+                                    action="store", default=None, type=str)
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
     parser.add_argument("--hide-failed", help="Hide failed devices", action="store_true")
@@ -102,9 +104,12 @@ def main(args):
     if version:
         print("netmiko-cfg v{}".format(__version__))
         return 0
+
+    cli_inv_filename = cli_args.invfile
+
     list_devices = cli_args.list_devices
     if list_devices:
-        my_devices = load_devices()
+        my_devices = load_devices(cli_inv_filename)
         display_inventory(my_devices)
         return 0
 
@@ -127,7 +132,7 @@ def main(args):
     hide_failed = cli_args.hide_failed
 
     output_q = Queue()
-    my_devices = load_devices()
+    my_devices = load_devices(cli_inv_filename)
     if device_or_group == 'all':
         device_group = obtain_all_devices(my_devices)
     else:
