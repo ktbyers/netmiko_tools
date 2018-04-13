@@ -73,7 +73,7 @@ def parse_arguments(args):
                         action="store", default=None, type=str)
     parser.add_argument("--username", help="Username", action="store", type=str)
     parser.add_argument("--password", help="Password", action="store_true")
-    parser.add_argument("--secret", help="Enable Secret", action="store", type=str)
+    parser.add_argument("--secret", help="Enable Secret", action="store_true")
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
@@ -92,7 +92,7 @@ def main(args):
 
     cli_username = cli_args.username if cli_args.username else None
     cli_password = getpass() if cli_args.password else None
-    cli_secret = cli_args.secret if cli_args.secret else None
+    cli_secret = getpass("Enable secret: ") if cli_args.secret else None
 
     version = cli_args.version
     if version:
