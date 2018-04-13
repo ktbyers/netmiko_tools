@@ -27,7 +27,7 @@ if not os.path.exists(GREP):
     GREP = '/usr/bin/grep'
 NETMIKO_BASE_DIR = '~/.netmiko'
 ERROR_PATTERN = "%%%failed%%%"
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
