@@ -13,6 +13,7 @@ try:
 except ImportError:
     from queue import Queue
 from datetime import datetime
+from getpass import getpass
 
 from netmiko import ConnectHandler
 from netmiko.utilities import load_devices, display_inventory
@@ -26,7 +27,7 @@ if not os.path.exists(GREP):
     GREP = '/usr/bin/grep'
 NETMIKO_BASE_DIR = '~/.netmiko'
 ERROR_PATTERN = "%%%failed%%%"
-__version__ = '0.0.3'
+__version__ = '0.1.0'
 
 
 def grepx(files, pattern, grep_options, use_colors=True):
@@ -70,8 +71,9 @@ def parse_arguments(args):
                         action="store", type=str)
     parser.add_argument("--cmd", help="Remote command to execute",
                         action="store", default=None, type=str)
-    # parser.add_argument("--username", help="Username", action="store", type=str)
-    # parser.add_argument("--password", help="Password", action="store", type=str)
+    parser.add_argument("--username", help="Username", action="store", type=str)
+    parser.add_argument("--password", help="Password", action="store_true")
+    parser.add_argument("--secret", help="Enable Secret", action="store", type=str)
     parser.add_argument("--use-cache", help="Use cached files", action="store_true")
     parser.add_argument("--list-devices", help="List devices from inventory", action="store_true")
     parser.add_argument("--display-runtime", help="Display program runtime", action="store_true")
@@ -87,6 +89,10 @@ def parse_arguments(args):
 def main(args):
     start_time = datetime.now()
     cli_args = parse_arguments(args)
+
+    cli_username = cli_args.username if cli_args.username else None
+    cli_password = getpass() if cli_args.password else None
+    cli_secret = cli_args.secret if cli_args.secret else None
 
     version = cli_args.version
     if version:
@@ -129,6 +135,12 @@ def main(args):
     failed_devices = []
     if not use_cached_files:
         for device_name, a_device in device_group.items():
+            if cli_username:
+                a_device['username'] = cli_username 
+            if cli_password:
+                a_device['password'] = cli_password
+            if cli_secret:
+                a_device['secret'] = cli_secret
             if not cmd_arg:
                 cli_command = SHOW_RUN_MAPPER.get(a_device['device_type'], 'show run')
             my_thread = threading.Thread(target=ssh_conn, args=(device_name, a_device,
