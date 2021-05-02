@@ -3,11 +3,8 @@ netmiko_tools
 [![Build Status](https://travis-ci.org/ktbyers/netmiko_tools.svg?branch=master)](https://travis-ci.org/ktbyers/netmiko_tools)  
 
 
-Netmiko CLI Tools  
+### This repository is deprecated. Netmiko Tools has been migrated directly to Netmiko (as an entry point).
   
-Python 2.7, 3.3, 3.4, 3.5  
-   
-   
   
 <br>
 ##### Tutorials: #####
@@ -19,7 +16,7 @@ https://pynet.twb-tech.com/blog/automation/netmiko-tools.html
   
 <br>
 ##### Requires: #####
-netmiko >= 1.0.0  
+netmiko >= 3.0.0  
 pyyaml  
   
   
