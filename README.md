@@ -3,7 +3,8 @@ netmiko_tools
 [![Build Status](https://travis-ci.org/ktbyers/netmiko_tools.svg?branch=master)](https://travis-ci.org/ktbyers/netmiko_tools)  
 
 
-### This repository is deprecated. Netmiko Tools has been migrated directly to Netmiko (as an entry point).
+### This repository is deprecated.
+### Netmiko Tools has been migrated directly to the Netmiko library as an entry point.
   
   
 <br>
