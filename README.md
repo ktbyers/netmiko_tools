@@ -15,9 +15,8 @@ https://pynet.twb-tech.com/blog/automation/netmiko-tools.html
   
   
   
-<br>      
----    
-Kirk Byers  
-Python for Network Engineers  
-https://pynet.twb-tech.com
-
+<br />
+---  
+Kirk Byers<br /> 
+Python for Network Engineers<br />
+https://pynet.twb-tech.com<br />
